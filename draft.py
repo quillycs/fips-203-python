@@ -1,6 +1,7 @@
 import hashlib
 
 q = 3329
+zeta = 17
 
 def xof_init():
     return hashlib.shake_128()
@@ -44,3 +45,22 @@ def SamplePolyCBD(B, eta):
         f[i] = (x - y) % q
 
     return f
+
+def BitRev7(r):
+    return int('{:07b}'.format(r)[::-1], 2)
+
+def NTT(f):
+    f_hat = f[:]
+    i = 1
+
+    for length in range(128, 1, -1 // 2):
+        for start in range(0, 256, 2 * length):
+            omega = pow(zeta, BitRev7(i), q)
+            i += 1
+
+            for j in range(start, start + length):
+                t = omega * f_hat[j + length] % q
+                f_hat[j + length] = (f_hat[j] - t) % q 
+                f_hat[j] = (f_hat[j] + t) % q
+
+    return f_hat

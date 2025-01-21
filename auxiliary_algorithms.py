@@ -33,20 +33,17 @@ def BitsToBytes(b):
     B = [0] * (len(b) // 8)
 
     for i in range(len(b)):
-        B[i // 8] += b[i] * (2 ** (i % 8))
+        B[i // 8] += b[i] * (2 ** (7 - (i % 8)))
 
     return B
 
 # Performs the inverse of BitsToBytes, converting a byte array into a bit array.
 def BytesToBits(B):
-    b = []
+    b = [0] * (len(B) * 8)
 
-    C = list(B)
-
-    for i in range(len(C)):
+    for i in range(len(B)):
         for j in range(8):
-            b.append(C[i] % 2)
-            C[i] //= 2
+            b[i * 8 + j] = (B[i] >> (7 - j)) & 1
 
     return b
 

@@ -1,3 +1,6 @@
+from Crypto.Hash import SHAKE128
+q = 3329
+
 # The function PRF takes a parameter 𝜂 ∈ {2, 3}, one 32-byte input, and one 1-byte input. It produces one (64 ⋅ 𝜂)-byte output.
 def PRF(eta, s, b):    
     input_data = s + bytes([b])
@@ -17,15 +20,14 @@ def G(c):
 # This standard uses a XOF wrapper defined in terms of the incremental API for SHAKE128 in SP 800-185.
 # The SHAKE128 API consists of three functions.
 def xof_init():
-    return hashlib.shake_128()
+    return SHAKE128.new()
 
-def xof_absorb(ctx, str):
-    ctx.update(str)
+def xof_absorb(ctx, data):
+    ctx.update(data)
     return ctx
 
 def xof_squeeze(ctx, z):
-    output = ctx.digest(z)
-
+    output = ctx.read(z)
     return ctx, output
 
 # Converts a bit array (of a length that is a multiple of eight) into an array of bytes.

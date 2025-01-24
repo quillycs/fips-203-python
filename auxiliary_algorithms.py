@@ -1,5 +1,15 @@
 from Crypto.Hash import SHAKE128
-q = 3329
+import parameter_set as params
+import hashlib
+
+def BitRev7(r):
+    reversed_r = 0
+
+    for i in range(7):
+        bit = (r >> i) & 1
+        reversed_r |= (bit << (6 - i))
+
+    return reversed_r
 
 # The function PRF takes a parameter 𝜂 ∈ {2, 3}, one 32-byte input, and one 1-byte input. It produces one (64 ⋅ 𝜂)-byte output.
 def PRF(eta, s, b):    
@@ -53,10 +63,10 @@ def BytesToBits(B):
 # First, decompression followed by compression preserves the input.
 # Second, if 𝑑 is large (i.e., close to 12), compression followed by decompression does not significantly alter the value.
 def compress(x, d):
-    return round((2 ** d / q) * x) % (2 ** d)
+    return round((2 ** d / params.q) * x) % (2 ** d)
 
 def decompress(y, d):
-    return round((q / (2 ** d)) * y)
+    return round((params.q / (2 ** d)) * y)
 
 # Encodes an array of 𝑑-bit integers into a byte array for 1 ≤ 𝑑 ≤ 12.
 def ByteEncode(F, d):
@@ -75,7 +85,7 @@ def ByteEncode(F, d):
 # Decodes a byte array into an array of 𝑑-bit integers for 1 ≤ 𝑑 ≤ 12.
 def ByteDecode(B, d):
     b = BytesToBits(B)
-    m = 2**d if d < 12 else q
+    m = 2**d if d < 12 else params.q
     F = [0] * 256
 
     for i in range(256):
@@ -95,11 +105,11 @@ def SampleNTT(B):
         d1 = C[0] + 256 * (C[1] % 16)
         d2 = (C[1] // 16) + 16 * C[2]
 
-        if d1 < q:
+        if d1 < params.q:
             a_hat[j] = d1
             j += 1
 
-        if d2 < q and j < 256:
+        if d2 < params.q and j < 256:
             a_hat[j] = d2
             j += 1
 
@@ -113,7 +123,7 @@ def SamplePolyCBD(B, eta):
     for i in range(256):
         x = sum(b[2 * i * eta + j] for j in range(eta))
         y = sum(b[2 * i * eta + eta + j] for j in range(eta))
-        f[i] = (x - y) % q
+        f[i] = (x - y) % params.q
 
     return f
 
@@ -126,13 +136,13 @@ def NTT(f):
 
     while length >= 2:
         for start in range(0, 256, 2 * length):
-            omega = pow(zeta, BitRev7(i), q)
+            omega = pow(params.zeta, BitRev7(i), params.q)
             i += 1
 
             for j in range(start, start + length):
-                t = omega * f_hat[j + length] % q
-                f_hat[j + length] = (f_hat[j] - t) % q 
-                f_hat[j] = (f_hat[j] + t) % q
+                t = omega * f_hat[j + length] % params.q
+                f_hat[j + length] = (f_hat[j] - t) % params.q 
+                f_hat[j] = (f_hat[j] + t) % params.q
 
         length //= 2
 
@@ -147,16 +157,16 @@ def NTT_inv(f_hat):
 
     while length <= 128:
         for start in range(0, 256, 2 * length):
-            zeta = pow(17, BitRev7(i), q)
+            zeta = pow(17, BitRev7(i), params.q)
             i -= 1
 
             for j in range(start, start + length):
                 t = f[j]
-                f[j] = (t + f[j + length]) % q
-                f[j + length] = zeta * (f[j + length] - t) % q
+                f[j] = (t + f[j + length]) % params.q
+                f[j + length] = zeta * (f[j + length] - t) % params.q
 
         length *= 2
 
-    f = [(x * 3303) % q for x in f]
+    f = [(x * 3303) % params.q for x in f]
     
     return f

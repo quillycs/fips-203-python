@@ -1,94 +1,82 @@
-import hashlib
-import random
-import os
+import auxiliary_algorithms as aux
+import parameter_set as params
 
-# Constant
-zeta = 17
+def keygen(d):
+    rho, sigma = aux.G(d + bytes([params.k]))
+    N = 0
 
-class KPKE:
-    def __init__(self, n, q, k, eta1, eta2, du, dv):
-        self.n = n
-        self.q = q
-        self.k = k
-        self.eta1 = eta1
-        self.eta2 = eta2
-        self.du = du
-        self.dv = dv
+    A = []
 
-    def keygen(self, d):
-        rho, sigma = G(d + bytes([k]))
-        N = 0
+    for i in range(params.k):
+        row = []
 
-        A = []
+        for j in range(params.k):
+            B = rho + bytes([j, i])
+            row.append(aux.SampleNTT(B))
 
-        for i in range(k):
-            row = []
+        A.append(row)
 
-            for j in range(k):
-                B = rho + bytes([j, i])
-                row.append(SampleNTT(B))
+    s = []
 
-            A.append(row)
+    for i in range(params.k):
+        prf_output = aux.PRF(params.eta1, sigma, N)
+        s.append(aux.SamplePolyCBD(prf_output, params.eta1))
+        N += 1
 
-        s = []
+    e = []
 
-        for i in range(k):
-            prf_output = PRF(eta1, sigma, N)
-            s.append(SamplePolyCBD(prf_output, eta1))
-            N += 1
+    for i in range(params.k):
+        prf_output = aux.PRF(params.eta1, sigma, N)
+        e.append(aux.SamplePolyCBD(prf_output, params.eta1))
+        N += 1
 
-        e = []
+    s_hat = [aux.NTT(s[i]) for s_i in s]
+    e_hat = [aux.NTT(e[i]) for e_i in e]
 
-        for i in range(k):
-            prf_output = PRF(eta1, sigma, N)
-            e.append(SamplePolyCBD(prf_output, eta1))
-            N += 1
+    t = []
 
-        s_hat = [NTT(s[i]) for s_i in s]
-        e_hat = [NTT(e[i]) for e_i in e]
+    for i in range(params.k):
+        t_row = [sum(A[i][j][n] * s_hat[j][n] % params.q for j in range(params.k)) % params.q for n in range(256)]
+        t.append([(t_row[n] + e_hat[i][n]) % params.q for n in range(256)])
 
-        t = []
+    ekPKE = b"".join(aux.ByteEncode(t_i, 12) for t_i in t) + rho
+    dkPKE = b"".join(aux.ByteEncode(s_hat_i, 12) for s_hat_i in s_hat)
+    
+    return ekPKE, dkPKE
 
-        for i in range(k):
-            t_row = [sum(A[i][j][n] * s_hat[j][n] % q for j in range(k)) % q for n in range(256)]
-            t.append([(t_row[n] + e_hat[i][n]) % q for n in range(256)])
+'''
+def encrypt(self, ekPKE, m, r):
+    N = 0
+    t_hat = [ByteEncode(ekPKE[i * 384:(i + 1) * 384], 12) for i in range(k)]
+    rho = ekPKE[384 * k: 384 * k + 32]
 
-        ekPKE = b"".join(ByteEncode(t_i, 12) for t_i in t) + rho
-        dkPKE = b"".join(ByteEncode(s_hat_i, 12) for s_hat_i in s_hat)
-        
-        return ekPKE, dkPKE
+    A_hat = [[SampleNTT(rho + bytes([j, i])) for j in range(k)] for i in range(k)]
 
-    def encrypt(self, ekPKE, m, r):
-        N = 0
-        t_hat = [ByteEncode(ekPKE[i * 384:(i + 1) * 384], 12) for i in range(k)]
-        rho = ekPKE[384 * k: 384 * k + 32]
+    y = [SamplePolyCBD(PRF(eta1, r, N), eta1) for _ in range(k)]
+    N += k
 
-        A_hat = [[SampleNTT(rho + bytes([j, i])) for j in range(k)] for i in range(k)]
+    e1 = [SamplePolyCBD(PRF(eta2, r, N), eta2) for _ in range(k)]
+    N += k
 
-        y = [SamplePolyCBD(PRF(eta1, r, N), eta1) for _ in range(k)]
-        N += k
+    e2 = SamplePolyCBD(PRF(eta2, r, N), eta2)
 
-        e1 = [SamplePolyCBD(PRF(eta2, r, N), eta2) for _ in range(k)]
-        N += k
+    y_hat = [NTT(y_i) for y_i in y]
 
-        e2 = SamplePolyCBD(PRF(eta2, r, N), eta2)
+    u = [NTT_inv([(sum(A_hat[j][i][n] * y_hat[j][n] % q for j in range(k)) + e1[i][n]) % q for n in range(256)]) for i in range(k)]
 
-        y_hat = [NTT(y_i) for y_i in y]
+    mu = ByteDecode(m, 12)
+    mu = decompress(mu, 12)
 
-        u = [NTT_inv([(sum(A_hat[j][i][n] * y_hat[j][n] % q for j in range(k)) + e1[i][n]) % q for n in range(256)]) for i in range(k)]
+    v = [(sum(t_hat[i][n] * y_hat[i][n] % q for i in range(k)) + e2[n] + mu[n]) % q for n in range(256)]
 
-        mu = ByteDecode(m, 12)
-        mu = decompress(mu, 12)
+    c1 = b"".join(ByteEncode([compress(u_i[n], du) for n in range(256)], du) for u_i in u)
+    c2 = ByteEncode([compress(v[n], dv) for n in range(256)], dv)
 
-        v = [(sum(t_hat[i][n] * y_hat[i][n] % q for i in range(k)) + e2[n] + mu[n]) % q for n in range(256)]
+    return c1 + c2
 
-        c1 = b"".join(ByteEncode([compress(u_i[n], du) for n in range(256)], du) for u_i in u)
-        c2 = ByteEncode([compress(v[n], dv) for n in range(256)], dv)
+def decrypt(dkPKE, c):
+    c1 = c[:32 * self.du * self.k]
+    c2 = c[32 * self.du * self.k:32 * (self.du * self.k + self.dv)]
 
-        return c1 + c2
-
-    def decrypt(self, dkPKE, c):
-        c1 = c[:32 * self.du * self.k]
-        c2 = c[32 * self.du * self.k:32 * (self.du * self.k + self.dv)]
-
-        u_prime = [decompress(ByteDecode(c1[i * 384:(i + 1) * 384], self.du), self.du) for i in range(self.k)]
+    u_prime = [decompress(ByteDecode(c1[i * 384:(i + 1) * 384], self.du), self.du) for i in range(self.k)]
+'''

@@ -44,39 +44,47 @@ def keygen(d):
     
     return ekPKE, dkPKE
 
-'''
-def encrypt(self, ekPKE, m, r):
+def encrypt(ekPKE, m, r):
     N = 0
-    t_hat = [ByteEncode(ekPKE[i * 384:(i + 1) * 384], 12) for i in range(k)]
-    rho = ekPKE[384 * k: 384 * k + 32]
+    t_hat = [aux.ByteEncode(ekPKE[i * 384:(i + 1) * 384], 12) for i in range(params.k)]
+    rho = ekPKE[384 * params.k: 384 * params.k + 32]
 
-    A_hat = [[SampleNTT(rho + bytes([j, i])) for j in range(k)] for i in range(k)]
+    A_hat = [[aux.SampleNTT(rho + bytes([j, i])) for j in range(params.k)] for i in range(params.k)]
 
-    y = [SamplePolyCBD(PRF(eta1, r, N), eta1) for _ in range(k)]
-    N += k
+    y = [aux.SamplePolyCBD(aux.PRF(params.eta1, r, N), params.eta1) for _ in range(params.k)]
+    N += params.k
 
-    e1 = [SamplePolyCBD(PRF(eta2, r, N), eta2) for _ in range(k)]
-    N += k
+    e1 = [aux.SamplePolyCBD(aux.PRF(params.eta2, r, N), params.eta2) for _ in range(params.k)]
+    N += params.k
 
-    e2 = SamplePolyCBD(PRF(eta2, r, N), eta2)
+    e2 = aux.SamplePolyCBD(aux.PRF(params.eta2, r, N), params.eta2)
 
-    y_hat = [NTT(y_i) for y_i in y]
+    y_hat = [aux.NTT(y_i) for y_i in y]
 
-    u = [NTT_inv([(sum(A_hat[j][i][n] * y_hat[j][n] % q for j in range(k)) + e1[i][n]) % q for n in range(256)]) for i in range(k)]
+    u = [aux.NTT_inv([(sum(A_hat[j][i][n] * y_hat[j][n] % params.q for j in range(params.k)) + e1[i][n]) % params.q for n in range(256)]) for i in range(params.k)]
 
-    mu = ByteDecode(m, 12)
-    mu = decompress(mu, 12)
+    mu = aux.ByteDecode(m, 1)
+    mu = [aux.decompress(val, 1) for val in mu]
 
-    v = [(sum(t_hat[i][n] * y_hat[i][n] % q for i in range(k)) + e2[n] + mu[n]) % q for n in range(256)]
+    v = [(sum(t_hat[i][n] * y_hat[i][n] % params.q for i in range(params.k)) + e2[n] + mu[n]) % params.q for n in range(256)]
 
-    c1 = b"".join(ByteEncode([compress(u_i[n], du) for n in range(256)], du) for u_i in u)
-    c2 = ByteEncode([compress(v[n], dv) for n in range(256)], dv)
+    c1 = b"".join(aux.ByteEncode([aux.compress(u_i[n], params.du) for n in range(256)], params.du) for u_i in u)
+    c2 = aux.ByteEncode([aux.compress(v[n], params.dv) for n in range(256)], params.dv)
 
     return c1 + c2
 
+'''
 def decrypt(dkPKE, c):
     c1 = c[:32 * self.du * self.k]
     c2 = c[32 * self.du * self.k:32 * (self.du * self.k + self.dv)]
 
     u_prime = [decompress(ByteDecode(c1[i * 384:(i + 1) * 384], self.du), self.du) for i in range(self.k)]
 '''
+
+d = b'\x01' * 32
+ekPKE, dkPKE = keygen(d)
+message = b'\x01' * 32
+randomness = b'\x02' * 32
+ciphertext = encrypt(ekPKE, message, randomness)
+print("Ciphertext:")
+print(ciphertext)

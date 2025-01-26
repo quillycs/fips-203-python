@@ -59,7 +59,7 @@ def BytesToBits(B):
 
     return b
 
-# The Compress and Decompress algorithmssatisfy two important properties.
+# The Compress and Decompress algorithms satisfy two important properties.
 # First, decompression followed by compression preserves the input.
 # Second, if 𝑑 is large (i.e., close to 12), compression followed by decompression does not significantly alter the value.
 def compress(x, d):
@@ -170,3 +170,18 @@ def NTT_inv(f_hat):
     f = [(x * 3303) % params.q for x in f]
     
     return f
+
+def MultiplyNTTs(f_hat, g_hat):
+    h = [0] * 256
+
+    for i in range(128):
+        h[2 * i], h[2 * i + 1] = BaseCaseMultiply(
+            f_hat[2 * i], f_hat[2 * i + 1], g_hat[2 * i], g_hat[2 * i + 1], params.zeta ** (2 * BitRev7(i) + 1)
+        )
+
+    return h
+
+def BaseCaseMultiply(a0, a1, b0, b1, gamma):
+    c0 = (a0 * b0 + a1 * b1 * gamma) % params.q
+    c1 = (a0 * b1 + a1 * b0) % params.q
+    return c0, c1

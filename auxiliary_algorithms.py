@@ -70,17 +70,23 @@ def decompress(y, d):
 
 # Encodes an array of 𝑑-bit integers into a byte array for 1 ≤ 𝑑 ≤ 12.
 def ByteEncode(F, d):
-    b = []
+    B = bytearray(256 * d)
+    m = 0
+
+    if d < 12:
+        m = 2 ** d
+    else:
+        m = params.q
 
     for i in range(256):
-        a = F[i]
+        a = F[i] % m
 
         for j in range(d):
-            b.append(a % 2)
-            a = (a - b[i * d + j]) // 2
-
-    B = BitsToBytes(b)
-    return bytes(B)
+            bit = a % 2
+            B[i * d + j] = bit
+            a = (a - bit) // 2
+            
+    return aux.BitsToBytes(B)
 
 # Decodes a byte array into an array of 𝑑-bit integers for 1 ≤ 𝑑 ≤ 12.
 def ByteDecode(B, d):

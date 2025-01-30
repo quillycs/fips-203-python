@@ -63,10 +63,10 @@ def BytesToBits(B):
 # First, decompression followed by compression preserves the input.
 # Second, if 𝑑 is large (i.e., close to 12), compression followed by decompression does not significantly alter the value.
 def compress(x, d):
-    return round((2 ** d / params.q) * x) % (2 ** d)
+    return [round((2 ** d / q) * element) % (2 ** d) for element in x]
 
 def decompress(y, d):
-    return round((params.q / (2 ** d)) * y)
+    return [round((q / (2 ** d)) * element) for element in y]
 
 # Encodes an array of 𝑑-bit integers into a byte array for 1 ≤ 𝑑 ≤ 12.
 def ByteEncode(F, d):

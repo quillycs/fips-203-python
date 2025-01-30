@@ -71,7 +71,7 @@ def decompress(y, d):
 # Encodes an array of 𝑑-bit integers into a byte array for 1 ≤ 𝑑 ≤ 12.
 def ByteEncode(F, d):
     B = bytearray(256 * d)
-    m == 2 ** d if d < 12 else params.q
+    m = 2 ** d if d < 12 else params.q
 
     for i in range(256):
         a = F[i] % m

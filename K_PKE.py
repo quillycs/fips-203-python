@@ -23,6 +23,7 @@ def keygen(d):
         s.append(aux.SamplePolyCBD(prf_output, params.eta1))
         N += 1
 
+    
     e = []
 
     for i in range(params.k):
@@ -30,19 +31,27 @@ def keygen(d):
         e.append(aux.SamplePolyCBD(prf_output, params.eta1))
         N += 1
 
-    s_hat = [aux.NTT(s[i]) for s_i in s]
-    e_hat = [aux.NTT(e[i]) for e_i in e]
+    s_hat = [aux.NTT(x) for x in s]
+    e_hat = [aux.NTT(y) for y in e]
 
     t = []
 
     for i in range(params.k):
-        t_row = [sum(A[i][j][n] * s_hat[j][n] % params.q for j in range(params.k)) % params.q for n in range(256)]
-        t.append([(t_row[n] + e_hat[i][n]) % params.q for n in range(256)])
+        t.append([0] * 256)
+
+        for j in range(params.k):
+            product = aux.MultiplyNTTs(A[i][j], s_hat[j])
+
+            for n in range(256):
+                t[i][n] = (t[i][n] + product[n]) % params.q
+
+        for n in range(256):
+            t[i][n] = (t[i][n] + e_hat[i][n]) % params.q
 
     ekPKE = b"".join(aux.ByteEncode(t_i, 12) for t_i in t) + rho
     dkPKE = b"".join(aux.ByteEncode(s_hat_i, 12) for s_hat_i in s_hat)
     
-    return ekPKE, dkPKE
+    return (ekPKE, dkPKE)
 
 def encrypt(ekPKE, m, r):
     N = 0
@@ -73,18 +82,35 @@ def encrypt(ekPKE, m, r):
 
     return c1 + c2
 
-'''
 def decrypt(dkPKE, c):
-    c1 = c[:32 * self.du * self.k]
-    c2 = c[32 * self.du * self.k:32 * (self.du * self.k + self.dv)]
+    c1 = c[:32 * params.du * params.k]
+    c2 = c[32 * params.du * params.k: 32 * (params.du * params.k + params.dv)]
 
-    u_prime = [decompress(ByteDecode(c1[i * 384:(i + 1) * 384], self.du), self.du) for i in range(self.k)]
-'''
+    u_prime = []
 
-d = b'\x01' * 32
-ekPKE, dkPKE = keygen(d)
-message = b'\x01' * 32
-randomness = b'\x02' * 32
-ciphertext = encrypt(ekPKE, message, randomness)
-print("Ciphertext:")
-print(ciphertext)
+    for i in range(params.k):
+        u_prime = aux.ByteDecode(c1, params.du)
+    
+    u_prime = [aux.decompress(val, params.du) for val in u_prime]
+
+    for i in range(params.k):
+        v_prime = aux.ByteDecode(c2, params.dv)
+
+    v_prime = [aux.decompress(val, params.dv) for val in v_prime]
+
+    s_hat = []
+
+    for i in range(params.k):
+        s_hat = aux.ByteDecode(dkPKE, 12)
+
+    w_right = aux.NTT_inv(aux.MultiplyNTTs(s_hat, aux.NTT(u_prime)))
+    w = []
+    m = []
+
+    for i in range(256):
+        w.append(v_prime[i] - w_right[i])
+        m.append(aux.compress(w[i], 1))
+
+    m = aux.ByteEncode(m, 1)
+
+    return m

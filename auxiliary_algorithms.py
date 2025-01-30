@@ -42,20 +42,25 @@ def xof_squeeze(ctx, z):
 
 # Converts a bit array (of a length that is a multiple of eight) into an array of bytes.
 def BitsToBytes(b):
-    B = [0] * (len(b) // 8)
-
-    for i in range(len(b)):
-        B[i // 8] += b[i] * (2 ** (7 - (i % 8)))
+    l = len(b) // 8
+    B = bytearray(l)
+    
+    for i in range(8 * l):
+        B[i // 8] += b[i] << (i % 8)
 
     return B
 
 # Performs the inverse of BitsToBytes, converting a byte array into a bit array.
 def BytesToBits(B):
-    b = [0] * (len(B) * 8)
+    l = len(B)
+    b = bytearray(8 * l)
 
-    for i in range(len(B)):
+    for i in range(l):
+        C = B[i]
+
         for j in range(8):
-            b[i * 8 + j] = (B[i] >> (7 - j)) & 1
+            b[i * 8 + j] = C % 2
+            C //= 2
 
     return b
 
@@ -70,6 +75,14 @@ def decompress(y, d):
 
 # Encodes an array of 𝑑-bit integers into a byte array for 1 ≤ 𝑑 ≤ 12.
 def ByteEncode(F, d):
+    if type(F[0]) == list:
+        b = b''
+
+        for f in F:
+            b += ByteEncode(f, d)
+
+        return b
+
     B = bytearray(256 * d)
     m = 2 ** d if d < 12 else params.q
 
@@ -80,7 +93,7 @@ def ByteEncode(F, d):
             bit = a % 2
             B[i * d + j] = bit
             a = (a - bit) // 2
-            
+        
     return BitsToBytes(B)
 
 # Decodes a byte array into an array of 𝑑-bit integers for 1 ≤ 𝑑 ≤ 12.

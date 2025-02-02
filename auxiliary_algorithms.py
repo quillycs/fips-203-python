@@ -221,3 +221,6 @@ def BaseCaseMultiply(a0, a1, b0, b1, gamma):
 
 def AddPolynomials(p1, p2):
     return [(p1[n] + p2[n]) % params.q for n in range(len(p1))]
+
+def SubtractPolynomials(p1, p2):
+    return [(p1[n] - p2[n]) % params.q for n in range(len(p1))]

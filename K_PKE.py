@@ -55,30 +55,42 @@ def keygen(d):
 
 def encrypt(ekPKE, m, r):
     N = 0
-    t_hat = [aux.ByteEncode(ekPKE[i * 384:(i + 1) * 384], 12) for i in range(params.k)]
+    t_hat = [aux.ByteDecode(ekPKE[i * 384:(i + 1) * 384], 12) for i in range(params.k)]
+    
     rho = ekPKE[384 * params.k: 384 * params.k + 32]
 
     A_hat = [[aux.SampleNTT(rho + bytes([j, i])) for j in range(params.k)] for i in range(params.k)]
 
-    y = [aux.SamplePolyCBD(aux.PRF(params.eta1, r, N), params.eta1) for _ in range(params.k)]
+    y = [aux.SamplePolyCBD(aux.PRF(params.eta1, r, N + i), params.eta1) for i in range(params.k)]
     N += params.k
 
-    e1 = [aux.SamplePolyCBD(aux.PRF(params.eta2, r, N), params.eta2) for _ in range(params.k)]
+    e1 = [aux.SamplePolyCBD(aux.PRF(params.eta2, r, N + i), params.eta2) for i in range(params.k)]
     N += params.k
 
     e2 = aux.SamplePolyCBD(aux.PRF(params.eta2, r, N), params.eta2)
 
     y_hat = [aux.NTT(y_i) for y_i in y]
 
-    u = [aux.NTT_inv([(sum(A_hat[j][i][n] * y_hat[j][n] % params.q for j in range(params.k)) + e1[i][n]) % params.q for n in range(256)]) for i in range(params.k)]
+    u = [[0] * 256 for _ in range(params.k)]
 
-    mu = aux.ByteDecode(m, 1)
-    mu = [aux.decompress(val, 1) for val in mu]
+    for i in range(params.k):
+        for j in range(params.k):
+            u[i] = aux.AddPolynomials(u[i], aux.MultiplyNTTs(A_hat[j][i], y_hat[j]))
 
-    v = [(sum(t_hat[i][n] * y_hat[i][n] % params.q for i in range(params.k)) + e2[n] + mu[n]) % params.q for n in range(256)]
+    u = [aux.AddPolynomials(aux.NTT_inv(u[i]), e1[i]) for i in range(params.k)]
 
-    c1 = b"".join(aux.ByteEncode([aux.compress(u_i[n], params.du) for n in range(256)], params.du) for u_i in u)
-    c2 = aux.ByteEncode([aux.compress(v[n], params.dv) for n in range(256)], params.dv)
+    mu  = aux.decompress(aux.ByteDecode(m, 1), 1)
+
+    v = [0] * 256
+    
+    for i in range(params.k): 
+        v = aux.AddPolynomials(v, aux.MultiplyNTTs(t_hat[i], y_hat[i]))
+    
+    v = aux.AddPolynomials(aux.NTT_inv(v), e2)
+    v = aux.AddPolynomials(v, mu)
+
+    c1 = b''.join(aux.ByteEncode(aux.compress(u[i], params.du), params.du) for i in range(params.k))
+    c2 = aux.ByteEncode(aux.compress(v, params.dv), params.dv)
 
     return c1 + c2
 

@@ -2,6 +2,25 @@ from Crypto.Hash import SHAKE128
 import parameter_set as params
 import hashlib
 
+TwoBitRev7_values = [
+    17, -17, 2761, -2761, 583, -583, 2649, -2649,
+    1637, -1637, 723, -723, 2288, -2288, 1100, -1100,
+    1409, -1409, 2662, -2662, 3281, -3281, 233, -233,
+    756, -756, 2156, -2156, 3015, -3015, 3050, -3050,
+    1703, -1703, 1651, -1651, 2789, -2789, 1789, -1789,
+    1847, -1847, 952, -952, 1461, -1461, 2687, -2687,
+    939, -939, 2308, -2308, 2437, -2437, 2388, -2388,
+    733, -733, 2337, -2337, 268, -268, 641, -641,
+    1584, -1584, 2298, -2298, 2037, -2037, 3220, -3220,
+    375, -375, 2549, -2549, 2090, -2090, 1645, -1645,
+    1063, -1063, 319, -319, 2773, -2773, 757, -757,
+    2099, -2099, 561, -561, 2466, -2466, 2594, -2594,
+    2804, -2804, 1092, -1092, 403, -403, 1026, -1026,
+    1143, -1143, 2150, -2150, 2775, -2775, 886, -886,
+    1722, -1722, 1212, -1212, 1874, -1874, 1029, -1029,
+    2110, -2110, 2935, -2935, 885, -885, 2154, -2154
+]
+
 def BitRev7(r):
     reversed_r = 0
 
@@ -68,10 +87,10 @@ def BytesToBits(B):
 # First, decompression followed by compression preserves the input.
 # Second, if 𝑑 is large (i.e., close to 12), compression followed by decompression does not significantly alter the value.
 def compress(x, d):
-    return [round((2 ** d / q) * element) % (2 ** d) for element in x]
+    return [round((2 ** d / params.q) * element) % (2 ** d) for element in x]
 
 def decompress(y, d):
-    return [round((q / (2 ** d)) * element) for element in y]
+    return [round((params.q / (2 ** d)) * element) for element in y]
 
 # Encodes an array of 𝑑-bit integers into a byte array for 1 ≤ 𝑑 ≤ 12.
 def ByteEncode(F, d):
@@ -190,7 +209,7 @@ def MultiplyNTTs(f_hat, g_hat):
 
     for i in range(128):
         h[2 * i], h[2 * i + 1] = BaseCaseMultiply(
-            f_hat[2 * i], f_hat[2 * i + 1], g_hat[2 * i], g_hat[2 * i + 1], params.zeta ** (2 * BitRev7(i) + 1)
+            f_hat[2 * i], f_hat[2 * i + 1], g_hat[2 * i], g_hat[2 * i + 1], TwoBitRev7_values[i]
         )
 
     return h
@@ -199,3 +218,6 @@ def BaseCaseMultiply(a0, a1, b0, b1, gamma):
     c0 = (a0 * b0 + a1 * b1 * gamma) % params.q
     c1 = (a0 * b1 + a1 * b0) % params.q
     return c0, c1
+
+def AddPolynomials(p1, p2):
+    return [(p1[n] + p2[n]) % params.q for n in range(len(p1))]

@@ -1,6 +1,7 @@
 from Crypto.Hash import SHAKE128
 import parameter_set as params
 import hashlib
+from Crypto.Hash import SHAKE256
 
 TwoBitRev7_values = [
     17, -17, 2761, -2761, 583, -583, 2649, -2649,
@@ -224,3 +225,9 @@ def AddPolynomials(p1, p2):
 
 def SubtractPolynomials(p1, p2):
     return [(p1[n] - p2[n]) % params.q for n in range(len(p1))]
+
+def H(s):
+    return hashlib.sha3_256(s).digest()
+
+def J(s):
+    return SHAKE256.new(s).read(32)

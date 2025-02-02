@@ -1,34 +1,29 @@
-import hashlib
-from K_PKE import KPKE
+import K_PKE
+import auxiliary_algorithms as aux
+import parameter_set as params
 
-class MLKEM_INTERNAL:
-    def __init__(self, kpke: KPKE):
-        self.kpke = kpke 
-    
-    def KeyGen_internal(self, d, z):
-        ekPKE, dkPKE = self.kpke.keygen(d)
-        ek = ekPKE
-        dk = dkPKE + ek + hashlib.sha3_256(ek).digest() + z
-        return ek, dk
+def keygen_internal(d, z):
+    ekPKE, dkPKE = K_PKE.keygen(d)
+    ek = ekPKE
+    dk = dkPKE + ek + aux.H(ek) + z
+    return ek, dk
 
-    def Encaps_internal(self, ek, m):
-        K, r = G(m + hashlib.sha3_256(ek).digest())
-        c = self.kpke.encrypt(ek, m, r)
-        return K, c
+def encaps_internal(ek, m):
+    K, r = aux.G(m + aux.H(ek))
+    c = K_PKE.encrypt(ek, m, r)
+    return K, c
 
-    def Decaps_internal(self, dk, c):
-        dkPKE = dk[:384 * self.kpke.k]
-        ekPKE = dk[384 * self.kpke.k:768 * self.kpke.k + 32]
-        h = dk[768 * self.kpke.k + 32:768 * self.kpke.k + 64]
-        z = dk[768 * self.kpke.k + 64:768 * self.kpke.k + 96]
+def decaps_internal(dk, c):
+    dkPKE = dk[0:384 * params.k]
+    ekPKE = dk[384 * params.k: 768 * params.k + 32]
+    h = dk[768 * params.k + 32: 768 * params.k + 64]
+    z = dk[768 * params.k + 64: 768 * params.k + 64]
+    m_prime = K_PKE.decrypt(dkPKE, c)
+    K_prime, r_prime = aux.G(m_prime + h)
+    K_hat = aux.J(z + c)
+    c_prime = K_PKE.encrypt(ekPKE, m_prime, r_prime)
 
-        m_prime = self.kpke.decrypt(dkPKE, c)
-        K_prime, r_prime = G(m_prime + h)
-        K = hashlib.sha3_256(z + c).digest()
+    if c != c_prime:
+        K_prime = K_hat
 
-        c_prime = self.kpke.encrypt(ekPKE, m_prime, r_prime)
-
-        if c != c_prime:
-            K_prime = K
-
-        return K_prime
+    return K_prime

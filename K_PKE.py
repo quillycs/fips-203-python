@@ -101,28 +101,24 @@ def decrypt(dkPKE, c):
     u_prime = []
 
     for i in range(params.k):
-        u_prime = aux.ByteDecode(c1, params.du)
-    
-    u_prime = [aux.decompress(val, params.du) for val in u_prime]
+        decoded = aux.ByteDecode(c1[32 * params.du * i:32 * params.du * (i + 1)], params.du)
+        u_prime.append(aux.decompress(decoded, params.du))
 
-    for i in range(params.k):
-        v_prime = aux.ByteDecode(c2, params.dv)
-
-    v_prime = [aux.decompress(val, params.dv) for val in v_prime]
+    v_prime = aux.decompress(aux.ByteDecode(c2, params.dv), params.dv)
 
     s_hat = []
 
     for i in range(params.k):
-        s_hat = aux.ByteDecode(dkPKE, 12)
+        decoded = aux.ByteDecode(dkPKE[384 * i : 384 * (i + 1)], 12)
+        s_hat.append(decoded)
 
-    w_right = aux.NTT_inv(aux.MultiplyNTTs(s_hat, aux.NTT(u_prime)))
-    w = []
-    m = []
+    w   = [0] * 256
 
-    for i in range(256):
-        w.append(v_prime[i] - w_right[i])
-        m.append(aux.compress(w[i], 1))
+    for i in range(params.k):
+        w = aux.AddPolynomials(w, aux.MultiplyNTTs(s_hat[i], aux.NTT(u_prime[i])))
 
-    m = aux.ByteEncode(m, 1)
+    w = aux.SubtractPolynomials(v_prime, aux.NTT_inv(w))
+    
+    m = aux.ByteEncode(aux.compress(w, 1), 1)
 
     return m

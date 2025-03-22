@@ -1,5 +1,5 @@
 from Crypto.Hash import SHAKE128
-import parameter_set as params
+import PARAMETER_SETS as params
 import hashlib
 from Crypto.Hash import SHAKE256
 

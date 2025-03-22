@@ -1,5 +1,5 @@
-import auxiliary_algorithms as aux
-import parameter_set as params
+import AUXILIARY_ALGORITHMS as aux
+import PARAMETER_SETS as params
 
 def keygen(d):
     rho, sigma = aux.G(d + bytes([params.k]))

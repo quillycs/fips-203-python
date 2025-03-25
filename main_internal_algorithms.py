@@ -1,16 +1,16 @@
-import K_PKE
-import AUXILIARY_ALGORITHMS as aux
-import PARAMETER_SETS as params
+import k_pke
+import auxiliary_algorithms as aux
+import parameter_sets as params
 
 def keygen_internal(d, z):
-    ekPKE, dkPKE = K_PKE.keygen(d)
+    ekPKE, dkPKE = k_pke.keygen(d)
     ek = ekPKE
     dk = dkPKE + ek + aux.H(ek) + z
     return ek, dk
 
 def encaps_internal(ek, m):
     K, r = aux.G(m + aux.H(ek))
-    c = K_PKE.encrypt(ek, m, r)
+    c = k_pke.encrypt(ek, m, r)
     return K, c
 
 def decaps_internal(dk, c):
@@ -18,10 +18,10 @@ def decaps_internal(dk, c):
     ekPKE = dk[384 * params.k: 768 * params.k + 32]
     h = dk[768 * params.k + 32: 768 * params.k + 64]
     z = dk[768 * params.k + 64: 768 * params.k + 64]
-    m_prime = K_PKE.decrypt(dkPKE, c)
+    m_prime = k_pke.decrypt(dkPKE, c)
     K_prime, r_prime = aux.G(m_prime + h)
     K_hat = aux.J(z + c)
-    c_prime = K_PKE.encrypt(ekPKE, m_prime, r_prime)
+    c_prime = k_pke.encrypt(ekPKE, m_prime, r_prime)
 
     if c != c_prime:
         K_prime = K_hat

@@ -94,58 +94,6 @@ def encrypt(ekPKE, m, r):
 
     return c1 + c2
 
-'''def encrypt(ek_pke, m, r):
-    n   = 0
-    t   = [ aux.ByteDecode(ek_pke[384*i:384*(i+1)], 12) for i in range(params.k) ]
-    rho = ek_pke[384*params.k : 384*params.k + 32]
-    a   = [ [None]*params.k for _ in range(params.k) ]
-    for i in range(params.k):
-        for j in range(params.k):
-            a[i][j] = aux.SampleNTT(rho + bytes([j, i]))
-
-    y = [None]*params.k
-    for i in range(params.k):
-        y[i] = aux.SamplePolyCBD(aux.PRF(params.eta1, r, n), params.eta1)
-        n   += 1
-    # print('# y:"', y)
-    e1 = [None]*params.k
-    for i in range(params.k):
-        e1[i] = aux.SamplePolyCBD(aux.PRF(params.eta2, r, n), params.eta2)
-        n += 1
-    # print('# e1:"', e1)
-    e2 = aux.SamplePolyCBD(aux.PRF(params.eta2, r, n), params.eta2)
-    # print('# e2:"', e2)
-    y   = [ aux.NTT(v) for v in y ]
-    # print('# yHat:"', y)
-    u   = [ [0]*256 for _ in range(params.k) ]
-    for i in range(params.k):
-        for j in range(params.k):
-            u[i] = aux.AddPolynomials(u[i], aux.MultiplyNTTs(a[j][i], y[j]))
-    # print('# AHat^T*yHat:"', u)
-    for i in range(params.k):
-        u[i] = aux.NTT_inv(u[i])
-        u[i] = aux.AddPolynomials(u[i], e1[i])
-    # print('# u:', u);
-
-    mu  = aux.decompress(aux.ByteDecode(m, 1), 1)
-    # print('# mu:', mu);
-
-    v   = [0]*256
-    for i in range(params.k):
-        v = aux.AddPolynomials(v, aux.MultiplyNTTs(t[i], y[i]))
-    # print('# tHat^T*yHat:', v)
-    v   = aux.NTT_inv(v)
-    # print('# NTTInverse(tHat^T*yHat):', v)
-    v   = aux.AddPolynomials(v, e2)
-    v   = aux.AddPolynomials(v, mu)
-    # print('# v:', v)
-    c1  = b''
-    for i in range(params.k):
-        c1 += aux.ByteEncode(aux.compress(u[i], params.du), params.du)
-    c2  = aux.ByteEncode(aux.compress(v, params.dv), params.dv)
-    c   = c1 + c2
-    return c'''
-
 def decrypt(dkPKE, c):
     c1 = c[:32 * params.du * params.k]
     c2 = c[32 * params.du * params.k: 32 * (params.du * params.k + params.dv)]

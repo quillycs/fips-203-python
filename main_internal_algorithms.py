@@ -17,7 +17,7 @@ def decaps_internal(dk, c):
     dkPKE = dk[0:384 * params.k]
     ekPKE = dk[384 * params.k: 768 * params.k + 32]
     h = dk[768 * params.k + 32: 768 * params.k + 64]
-    z = dk[768 * params.k + 64: 768 * params.k + 64]
+    z = dk[768 * params.k + 64: 768 * params.k + 96]
     m_prime = k_pke.decrypt(dkPKE, c)
     K_prime, r_prime = aux.G(m_prime + h)
     K_hat = aux.J(z + c)

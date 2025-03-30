@@ -1,9 +1,12 @@
 import unittest
 import json
+import sys
+import os
+sys.path.append(os.path.abspath(".."))
 from mlkem import keygen_for_testing as keygen
 
 '''
-    NOTE: YOU MUST ENSURE THAT YOU HAVE THE CORRECT PARAMETER SET (ML-KEM-512) IN THE PARAMETER_SETS.py FILE BEFORE RUNNING THESE TESTS.
+    NOTE: YOU MUST ENSURE THAT YOU HAVE SET THE CORRECT PARAMETER SET (ML-KEM-712) IN THE PARAMETER_SETS.py FILE BEFORE RUNNING THESE TESTS.
     THE TESTS WILL FAIL IF THE PARAMETER SET IS INCORRECT.
 '''
 
@@ -11,10 +14,10 @@ class TestMLKEMKeygen(unittest.TestCase):
     @classmethod
     
     def setUpClass(cls):
-        with open("test_vectors_keygen/prompt.json", "r") as f:
+        with open("../test_vectors_keygen/prompt.json", "r") as f:
             cls.prompt_data = json.load(f)
             
-        with open("test_vectors_keygen/expectedResults.json", "r") as f:
+        with open("../test_vectors_keygen/expectedResults.json", "r") as f:
             cls.expected_data = json.load(f)
             
         cls.expected_lookup = {
@@ -24,7 +27,7 @@ class TestMLKEMKeygen(unittest.TestCase):
         }
         
     def test_keygen(self):
-        for test in self.prompt_data["testGroups"][0]["tests"]:
+        for test in self.prompt_data["testGroups"][1]["tests"]:
             tc_id = test["tcId"]
             d = bytes.fromhex(test["d"])
             z = bytes.fromhex(test["z"])

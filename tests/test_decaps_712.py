@@ -1,9 +1,12 @@
 import unittest
 import json
+import sys
+import os
+sys.path.append(os.path.abspath(".."))
 from mlkem import encaps_for_testing as encaps, decaps_for_testing as decaps
 
 '''
-    NOTE: YOU MUST ENSURE THAT YOU HAVE THE CORRECT PARAMETER SET (ML-KEM-512) IN THE PARAMETER_SETS.py FILE BEFORE RUNNING THESE TESTS.
+    NOTE: YOU MUST ENSURE THAT YOU HAVE SET THE CORRECT PARAMETER SET (ML-KEM-512) IN THE PARAMETER_SETS.py FILE BEFORE RUNNING THESE TESTS.
     THE TESTS WILL FAIL IF THE PARAMETER SET IS INCORRECT.
 '''
 
@@ -11,21 +14,21 @@ class TestMLKEMDecaps(unittest.TestCase):
     @classmethod
     
     def setUpClass(cls):
-        with open("test_vectors_encaps_decaps/prompt.json", "r") as f:
+        with open("../test_vectors_encaps_decaps/prompt.json", "r") as f:
             cls.prompt_data = json.load(f)
             
-        with open("test_vectors_encaps_decaps/expectedResults.json", "r") as f:
+        with open("../test_vectors_encaps_decaps/expectedResults.json", "r") as f:
             cls.expected_data = json.load(f)
             
         cls.expected_lookup = {
             test["tcId"]: (bytes.fromhex(test["k"]))
-            for test in cls.expected_data["testGroups"][3]["tests"]
+            for test in cls.expected_data["testGroups"][4]["tests"]
         }
         
     def test_decaps(self):
-        dk = bytes.fromhex(self.prompt_data["testGroups"][3]["dk"])
+        dk = bytes.fromhex(self.prompt_data["testGroups"][4]["dk"])
         
-        for test in self.prompt_data["testGroups"][3]["tests"]:
+        for test in self.prompt_data["testGroups"][4]["tests"]:
             tc_id = test["tcId"]
             c = bytes.fromhex(test["c"])
             k = decaps(dk, c)

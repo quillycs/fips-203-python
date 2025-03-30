@@ -1,9 +1,12 @@
 import unittest
 import json
-from mlkem import encaps_for_testing as encaps, decaps_for_testing as decaps
+import sys
+import os
+sys.path.append(os.path.abspath(".."))
+from mlkem import encaps_for_testing as encaps
 
 '''
-    NOTE: YOU MUST ENSURE THAT YOU HAVE THE CORRECT PARAMETER SET (ML-KEM-512) IN THE PARAMETER_SETS.py FILE BEFORE RUNNING THESE TESTS.
+    NOTE: YOU MUST ENSURE THAT YOU HAVE SET THE CORRECT PARAMETER SET (ML-KEM-512) IN THE PARAMETER_SETS.py FILE BEFORE RUNNING THESE TESTS.
     THE TESTS WILL FAIL IF THE PARAMETER SET IS INCORRECT.
 '''
 
@@ -11,10 +14,10 @@ class TestMLKEMEncaps(unittest.TestCase):
     @classmethod
     
     def setUpClass(cls):
-        with open("test_vectors_encaps_decaps/prompt.json", "r") as f:
+        with open("../test_vectors_encaps_decaps/prompt.json", "r") as f:
             cls.prompt_data = json.load(f)
             
-        with open("test_vectors_encaps_decaps/expectedResults.json", "r") as f:
+        with open("../test_vectors_encaps_decaps/expectedResults.json", "r") as f:
             cls.expected_data = json.load(f)
             
         cls.expected_lookup = {

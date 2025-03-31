@@ -155,8 +155,9 @@ def PRF(eta, s, b):
     """
     
     input_data = s + bytes([b])
-    shake = hashlib.shake_256(input_data)
-    output = shake.digest(64 * eta)
+    shake = SHAKE256.new()
+    shake.update(input_data)
+    output = shake.read(64 * eta)
     
     return output
 

@@ -48,15 +48,12 @@ def keygen(d):
 
     for i in range(params.k): # noisy linear system in NTT domain
         t.append([0] * 256)
-
+        
         for j in range(params.k):
             product = aux.MultiplyNTTs(A[i][j], s_hat[j])
-
-            for n in range(256):
-                t[i][n] = (t[i][n] + product[n]) % params.q
-
-        for n in range(256):
-            t[i][n] = (t[i][n] + e_hat[i][n]) % params.q
+            t[i] = aux.AddPolynomials(t[i], product)
+        
+        t[i] = aux.AddPolynomials(t[i], e_hat[i])
 
     ekPKE = b"".join(aux.ByteEncode(t_i, 12) for t_i in t) + rho # run ByteEncode k times, then append A_hat-seed
     dkPKE = b"".join(aux.ByteEncode(s_hat_i, 12) for s_hat_i in s_hat) # run ByteEncode k times

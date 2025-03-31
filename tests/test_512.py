@@ -16,10 +16,10 @@ class TestMLKEM(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Load test vectors for key generation
-        with open("../test_vectors_keygen/prompt.json", "r") as f:
+        with open("keygen_test_vectors/prompt.json", "r") as f:
             cls.keygen_prompt_data = json.load(f)
             
-        with open("../test_vectors_keygen/expectedResults.json", "r") as f:
+        with open("keygen_test_vectors/expectedResults.json", "r") as f:
             cls.keygen_expected_data = json.load(f)
             
         cls.keygen_expected_lookup = {
@@ -29,10 +29,10 @@ class TestMLKEM(unittest.TestCase):
         }
         
         # Load test vectors for encapsulation and decapsulation
-        with open("../test_vectors_encaps_decaps/prompt.json", "r") as f:
+        with open("encaps_decaps_test_vectors/prompt.json", "r") as f:
             cls.encaps_decaps_prompt_data = json.load(f)
             
-        with open("../test_vectors_encaps_decaps/expectedResults.json", "r") as f:
+        with open("encaps_decaps_test_vectors/expectedResults.json", "r") as f:
             cls.encaps_decaps_expected_data = json.load(f)
             
         # Create lookup for encapsulation test data

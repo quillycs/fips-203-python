@@ -8,6 +8,8 @@ def keygen():
     """
     This is algorithm 19 from the FIPS 203 document.
     
+    Generates an encapsulation key and a corresponding decapsulation key.
+    
     Output:
     - encapsulation key ek ∈ B^(384k + 32).
     - decapsulation key dk ∈ B^(768 + 96).
@@ -77,7 +79,3 @@ def encaps_for_testing(ek, m):
     
     K, c = internal.encaps_internal(ek, m)
     return K, c
-
-def decaps_for_testing(dk, c):
-    K_prime = internal.decaps_internal(dk, c)
-    return K_prime

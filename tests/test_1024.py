@@ -5,7 +5,7 @@ import os
 sys.path.append(os.path.abspath(".."))
 from mlkem import keygen_for_testing as keygen
 from mlkem import encaps_for_testing as encaps
-from mlkem import decaps_for_testing as decaps
+from mlkem import decaps
 
 '''
     NOTE: YOU MUST ENSURE THAT YOU HAVE SET THE CORRECT PARAMETER SET (ML-KEM-1024) IN THE PARAMETER_SETS.py FILE BEFORE RUNNING THESE TESTS.

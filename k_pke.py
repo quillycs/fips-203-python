@@ -5,6 +5,8 @@ def keygen(d):
     """
     This is algorithm 13 from the FIPS 203 document.
     
+    Uses randomness to generate an encryption key and a corresponding decryption key.
+    
     Input:
     - randomness d ∈ B^32.
     

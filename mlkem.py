@@ -75,7 +75,7 @@ def decaps(dk, c):
     return K_prime
 
 """
-The following three functions are identical to the above three functions but have modified parameters (to consume the static test vectors) for testing purposes.
+The following two functions have modified parameters (to consume the static test vectors) for testing purposes.
 """
 
 def keygen_for_testing(d, z):

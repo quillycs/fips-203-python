@@ -1,8 +1,10 @@
-import k_pke
 import main_internal_algorithms as internal
-import auxiliary_algorithms as aux
-import parameter_sets as params
-import os
+from aes_drbg import AES_DRBG
+from Crypto.Random import get_random_bytes
+
+"""
+IMPORTANT: Your system must be in FIPS mode for the use of Crypto.Random to be compliant with the FIPS 203 document. In FIPS mode, the cryptographic modules are configured to use only FIPS-approved algorithms and security functions. Without this configuration, the random number generation may not meet the requirements specified in FIPS 203.
+"""
 
 def keygen():
     """
@@ -15,11 +17,16 @@ def keygen():
     - decapsulation key dk ∈ B^(768 + 96).
     """
     
-    d = os.urandom(32)
-    z = os.urandom(32)
+    drbg = AES_DRBG(keylen = 256)
+    entropy = get_random_bytes(48)
+    
+    drbg.instantiate(entropy_in = entropy)
+    
+    d = drbg.generate(32)
+    z = drbg.generate(32)
     
     if d is None or z is None:
-        return None # return an error indication if random bit generation failed
+        return "ERROR: Random bit generation failed" # return an error indication if random bit generation failed
     
     ek, dk = internal.keygen_internal(d, z) # run internal key generation algorithm
     return ek, dk
@@ -37,10 +44,15 @@ def encaps(ek):
     - shared secret K ∈ B^32.
     - ciphertext c ∈ B^(32(d_u * k + d_v)).
     """
-    m = os.urandom(32)
+    drbg = AES_DRBG(keylen = 256)
+    entropy = get_random_bytes(48)
+    
+    drbg.instantiate(entropy_in = entropy)
+    
+    m = drbg.generate(32)
     
     if m is None:
-        return None # return an error indication if random bit generation failed
+        return "ERROR: Random bit generation failed" # return an error indication if random bit generation failed
     
     K, c = internal.encaps_internal(ek, m) # run internal encapsulation algorithm
     return K, c

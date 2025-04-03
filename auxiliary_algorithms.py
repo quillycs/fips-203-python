@@ -1,7 +1,7 @@
 import parameter_sets as params
+import hashlib
 from Crypto.Hash import SHAKE128
 from Crypto.Hash import SHAKE256
-import hashlib
 
 BitRev7_values = [
     1, 1729, 2580, 3289, 2642, 630, 1897, 848,

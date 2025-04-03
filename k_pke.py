@@ -1,5 +1,5 @@
-import auxiliary_algorithms as aux
 import parameter_sets as params
+import auxiliary_algorithms as aux
 
 def keygen(d):
     """

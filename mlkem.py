@@ -3,7 +3,7 @@ from aes_drbg import AES_DRBG
 from Crypto.Random import get_random_bytes
 
 """
-IMPORTANT: Your system must be in FIPS mode for the use of Crypto.Random to be compliant with the FIPS 203 document. In FIPS mode, the cryptographic modules are configured to use only FIPS-approved algorithms and security functions. Without this configuration, the random number generation may not meet the requirements specified in FIPS 203.
+IMPORTANT: Your system must be in FIPS mode for the use of Crypto.Random to be compliant with the FIPS 203 document. Crypto.Random is used to create entropy for the deterministic random bit generator. In FIPS mode, the cryptographic modules are configured to use only FIPS-approved algorithms and security functions. Without this configuration, the random bit generation may not meet the requirements specified in FIPS 203.
 """
 
 def keygen():
@@ -17,10 +17,9 @@ def keygen():
     - decapsulation key dk ∈ B^(768 + 96).
     """
     
-    drbg = AES_DRBG(keylen = 256)
-    entropy = get_random_bytes(48)
-    
-    drbg.instantiate(entropy_in = entropy)
+    drbg = AES_DRBG(keylen = 256) # initialises a FIPS-203 compliant deterministic random bit generator (drbg)
+    entropy = get_random_bytes(48) # generates entropy using Crypto.Random
+    drbg.instantiate(entropy_in = entropy) # feeds the entropy into the drbg
     
     d = drbg.generate(32)
     z = drbg.generate(32)
@@ -44,10 +43,9 @@ def encaps(ek):
     - shared secret K ∈ B^32.
     - ciphertext c ∈ B^(32(d_u * k + d_v)).
     """
-    drbg = AES_DRBG(keylen = 256)
-    entropy = get_random_bytes(48)
-    
-    drbg.instantiate(entropy_in = entropy)
+    drbg = AES_DRBG(keylen = 256) # initialises a FIPS-203 compliant deterministic random bit generator (drbg)
+    entropy = get_random_bytes(48) # generates entropy using Crypto.Random
+    drbg.instantiate(entropy_in = entropy) # feeds the entropy into the drbg
     
     m = drbg.generate(32)
     

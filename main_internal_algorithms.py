@@ -1,6 +1,6 @@
-import k_pke
-import auxiliary_algorithms as aux
 import parameter_sets as params
+import auxiliary_algorithms as aux
+import k_pke
 
 def keygen_internal(d, z):
     """

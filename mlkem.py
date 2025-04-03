@@ -4,6 +4,8 @@ from Crypto.Random import get_random_bytes
 
 """
 IMPORTANT: Your system must be in FIPS mode for the use of Crypto.Random to be compliant with the FIPS 203 document. Crypto.Random is used to create entropy for the deterministic random bit generator. In FIPS mode, the cryptographic modules are configured to use only FIPS-approved algorithms and security functions. Without this configuration, the random bit generation may not meet the requirements specified in FIPS 203.
+
+Read the README.md file for more details.
 """
 
 def keygen():

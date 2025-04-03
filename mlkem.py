@@ -1,11 +1,9 @@
 import main_internal_algorithms as internal
 from aes_drbg import AES_DRBG
-from Crypto.Random import get_random_bytes
+from ssl import RAND_bytes as rand
 
 """
-IMPORTANT: Your system must be in FIPS mode for the use of Crypto.Random to be compliant with the FIPS 203 document. Crypto.Random is used to create entropy for the deterministic random bit generator. In FIPS mode, the cryptographic modules are configured to use only FIPS-approved algorithms and security functions. Without this configuration, the random bit generation may not meet the requirements specified in FIPS 203.
-
-Read the README.md file for more details.
+IMPORTANT: Your installation of OpenSSL must be FIPS-enabled for compliance with FIPS 203. If your OpenSSL installation does not have FIPS enabled, entropy generation will still work, but it will not be compliant with FIPS 203.
 """
 
 def keygen():
@@ -20,7 +18,7 @@ def keygen():
     """
     
     drbg = AES_DRBG(keylen = 256) # initialises a FIPS-203 compliant deterministic random bit generator (drbg)
-    entropy = get_random_bytes(48) # generates entropy using Crypto.Random
+    entropy = rand(48) # generates entropy using OpenSSL
     drbg.instantiate(entropy_in = entropy) # feeds the entropy into the drbg
     
     d = drbg.generate(32)
@@ -46,7 +44,7 @@ def encaps(ek):
     - ciphertext c ∈ B^(32(d_u * k + d_v)).
     """
     drbg = AES_DRBG(keylen = 256) # initialises a FIPS-203 compliant deterministic random bit generator (drbg)
-    entropy = get_random_bytes(48) # generates entropy using Crypto.Random
+    entropy = rand(48) # generates entropy using OpenSSL
     drbg.instantiate(entropy_in = entropy) # feeds the entropy into the drbg
     
     m = drbg.generate(32)

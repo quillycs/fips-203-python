@@ -46,13 +46,4 @@ This implementation passes all tests.
 # Using the implementation without the static test vectors
 ```ML-KEM.KeyGen()``` and ```ML-KEM.Encaps(ek)``` use a deterministic random bit generator (RBG) whose code can be found in ```aes_drbg.py``` (sourced from https://github.com/popcornell/pyAES_DRBG/tree/master). Feel free to clone the source repository and test the deterministic RBG using NIST's static test vectors to independently confirm that it is compliant with FIPS 203. 
 
-The deterministic RBG takes in "entropy" as a parameter for generation. The creation of said "entropy" must also be compliant with FIPS 203. My implementation uses ```get_random_bytes``` from ```Crypto.Random``` to create the "entropy". This is only compliant with FIPS 203 if the machine the program is being used on is running in FIPS mode. I have a Windows machine so I can provide the steps to ensure one's Windows machine is in FIPS mode. If you are using Linux or MacOS, you will need to do the research yourself.
-
-## Windows
-1) Press ```Windows + r``` and enter ```gpedit.msc```.
-2) In the ```Local Group Policy Editor```, navigate to ```Computer Configuration``` > ```Windows Settings``` > ```Security Settings``` > ```Local Policies``` > ```Security Options```.
-3) Find the setting named ```System cryptography: Use FIPS compliant algorithms for encryption, hashing, and signing``` and double-click on it.
-4) Select the ```Enabled``` option and click ```OK```.
-5) Close the ```Local Group Policy Editor``` and restart your computer for the changes to take effect.
-
-Note: Enabling FIPS mode may impact the functionality of some applications that do not support FIPS-compliant algorithms.
+The deterministic RBG takes in "entropy" as a parameter for generation. The creation of said "entropy" must also be compliant with FIPS 203. My implementation uses ```RAND_bytes``` from ```ssl``` to create the "entropy". This is only compliant with FIPS 203 if the OpenSSL installation on your computer is FIPS-enabled.

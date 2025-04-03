@@ -15,8 +15,11 @@ from mlkem import decaps
     - Encapsulation (`encaps`)
     - Decapsulation (`decaps`)
 
-    NIST-provided test vectors are loaded from JSON files for validation.
-    
+    This test suite validates the ML-KEM implementation against NIST-provided test vectors. The process is as follows:
+        - Test vectors are loaded from NIST-supplied JSON files.
+        - These inputs are passed through the three ML-KEM functions: keygen, encaps and decaps.
+        - The outputs are compared byte-for-byte against the expected outputs from NIST’s test vectors to ensure correctness.
+
     NOTE: YOU MUST ENSURE THAT YOU HAVE SET THE CORRECT PARAMETER SET (ML-KEM-768) IN THE PARAMETER_SETS.py FILE BEFORE RUNNING THESE TESTS.
     THE TESTS WILL FAIL IF THE PARAMETER SET IS INCORRECT.
 '''

@@ -8,6 +8,15 @@ from mlkem import encaps_for_testing as encaps
 from mlkem import decaps
 
 '''
+    Unit tests for ML-KEM implementation.
+
+    Tests cover:
+    - Key generation (`keygen`)
+    - Encapsulation (`encaps`)
+    - Decapsulation (`decaps`)
+
+    NIST-provided test vectors are loaded from JSON files for validation.
+    
     NOTE: YOU MUST ENSURE THAT YOU HAVE SET THE CORRECT PARAMETER SET (ML-KEM-768) IN THE PARAMETER_SETS.py FILE BEFORE RUNNING THESE TESTS.
     THE TESTS WILL FAIL IF THE PARAMETER SET IS INCORRECT.
 '''
@@ -55,8 +64,8 @@ class TestMLKEM(unittest.TestCase):
             z = bytes.fromhex(test["z"])
             ek, dk = keygen(d, z)
             expected_ek, expected_dk = self.keygen_expected_lookup[tc_id]
-            self.assertEqual(ek, expected_ek, f"Encapsulation Key mismatch for tcId {tc_id}!")
-            self.assertEqual(dk, expected_dk, f"Decapsulation Key mismatch for tcId {tc_id}!")
+            self.assertEqual(ek, expected_ek, f"ek (encapsulation key) mismatch for tcId {tc_id}!")
+            self.assertEqual(dk, expected_dk, f"dk (decapsulation key) mismatch for tcId {tc_id}!")
     
     def test_encaps(self):
         print("\nRunning encapsulation tests...")
@@ -66,8 +75,8 @@ class TestMLKEM(unittest.TestCase):
             m = bytes.fromhex(test["m"])
             k, c = encaps(ek, m)
             expected_c, expected_k = self.encaps_expected_lookup[tc_id]
-            self.assertEqual(c, expected_c, f"Ciphertext mismatch for tcId {tc_id}!")
-            self.assertEqual(k, expected_k, f"Shared key mismatch for tcId {tc_id}!")
+            self.assertEqual(c, expected_c, f"c (ciphertext) mismatch for tcId {tc_id}!")
+            self.assertEqual(k, expected_k, f"k (shared key) mismatch for tcId {tc_id}!")
     
     def test_decaps(self):
         print("Running decapsulation tests...")
@@ -78,7 +87,7 @@ class TestMLKEM(unittest.TestCase):
             c = bytes.fromhex(test["c"])
             k = decaps(dk, c)
             expected_k = self.decaps_expected_lookup[tc_id]
-            self.assertEqual(k, expected_k, f"Decapsulated key mismatch for tcId {tc_id}!")
+            self.assertEqual(k, expected_k, f"k (decapsulated key) mismatch for tcId {tc_id}!")
                 
 if __name__ == "__main__":
     unittest.main()

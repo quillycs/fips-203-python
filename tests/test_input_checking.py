@@ -2,6 +2,7 @@ import os
 import sys
 import unittest
 from unittest.mock import patch
+# Adjust the Python path to include the parent directory where mlkem is located
 sys.path.append(os.path.abspath(".."))
 
 from mlkem import keygen, encaps

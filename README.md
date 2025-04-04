@@ -41,6 +41,7 @@ dv = 5'''
 - To test key generation, run `python3 test_keygen_{parameter set number goes here (e.g. 768)}.py` in the console.
 - To test encapsulation, run `python3 test_encaps_{parameter set number goes here (e.g. 768)}.py` in the console.
 - To test decapsulation, run `python3 test_decaps_{parameter set number goes here (e.g. 768)}.py` in the console.
+- To test input checking, run `python3 test_input_checking.py` in the console.
 
 This implementation passes all tests.
 
